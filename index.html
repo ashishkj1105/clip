@@ -17,54 +17,126 @@
         font-size: 16px;
         padding: 10px;
       }
+      /* Modal styles */
+      .modal {
+        display: block; /* Show the modal by default */
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: rgba(0, 0, 0, 0.5); /* Black background with opacity */
+      }
+      .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto; /* 15% from the top and centered */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 300px; /* Could be more or less, depending on screen size */
+        border-radius: 5px;
+        text-align: center;
+      }
+      .modal-content input[type="password"] {
+        width: 90%;
+        padding: 10px;
+        margin: 10px 0;
+        font-size: 16px;
+      }
+      .modal-content button {
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      /* Hide the main content initially */
+      #mainContent {
+        display: none;
+      }
     </style>
   </head>
   <body>
-    <h1>Real-Time Notepad</h1>
-    <p>Type anything below. Changes will instantly sync across all browsers!</p>
+    <!-- Modal for password entry -->
+    <div id="passwordModal" class="modal">
+      <div class="modal-content">
+        <h2>Enter Password</h2>
+        <input type="password" id="passwordInput" placeholder="Password" />
+        <br />
+        <button id="submitPassword">Submit</button>
+        <p id="errorMessage" style="color: red; display: none;">Incorrect password. Please try again.</p>
+      </div>
+    </div>
 
-    <textarea id="notepad" placeholder="Start typing..."></textarea>
+    <!-- Main content -->
+    <div id="mainContent">
+      <h1>Real-Time Notepad</h1>
+      <p>Type anything below. Changes will instantly sync across all browsers!</p>
 
-    <script>
-      // TODO: Replace this config object with your own from the Firebase console
-      var firebaseConfig = {
-        apiKey: "AIzaSyCWfmVe1bh8OXgw0PjnAbfVD6ZOnRJ4-6o",
-    authDomain: "clipboard-e729a.firebaseapp.com",
-    projectId: "clipboard-e729a",
-    storageBucket: "clipboard-e729a.firebasestorage.app",
-    messagingSenderId: "212944151207",
-    appId: "1:212944151207:web:fd2dbdec1c76ce2bf13182",
-    measurementId: "G-L6CTJD19HW"
+      <textarea id="notepad" placeholder="Start typing..."></textarea>
 
-      };
-
-      // Initialize Firebase
-      firebase.initializeApp(firebaseConfig);
-
-      // Initialize Firestore
-      const db = firebase.firestore();
-
-      // Reference a single document (e.g., "publicNote")
-      const noteDocRef = db.collection("notes").doc("publicNote");
-
-      // Listen for live changes to the document
-      noteDocRef.onSnapshot(function(doc) {
-        if (doc.exists) {
-          const data = doc.data();
-          const textArea = document.getElementById("notepad");
-          if (data && data.content !== textArea.value) {
-            textArea.value = data.content;
+      <script>
+        // Password Protection Script
+        document.getElementById('submitPassword').addEventListener('click', function() {
+          const enteredPassword = document.getElementById('passwordInput').value;
+          const correctPassword = 'ni3';
+          if (enteredPassword === correctPassword) {
+            // Hide the modal and show the main content
+            document.getElementById('passwordModal').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+          } else {
+            // Show error message
+            document.getElementById('errorMessage').style.display = 'block';
           }
-        }
-      });
-
-      // Update Firestore whenever the text area changes
-      const textArea = document.getElementById("notepad");
-      textArea.addEventListener("input", function() {
-        noteDocRef.set({
-          content: textArea.value
         });
-      });
-    </script>
+
+        // Optional: Allow pressing Enter to submit the password
+        document.getElementById('passwordInput').addEventListener('keyup', function(event) {
+          if (event.key === 'Enter') {
+            document.getElementById('submitPassword').click();
+          }
+        });
+
+        // Real-Time Notepad Script
+
+        // TODO: Replace this config object with your own from the Firebase console
+        var firebaseConfig = {
+          apiKey: "AIzaSyCWfmVe1bh8OXgw0PjnAbfVD6ZOnRJ4-6o",
+          authDomain: "clipboard-e729a.firebaseapp.com",
+          projectId: "clipboard-e729a",
+          storageBucket: "clipboard-e729a.firebasestorage.app",
+          messagingSenderId: "212944151207",
+          appId: "1:212944151207:web:fd2dbdec1c76ce2bf13182",
+          measurementId: "G-L6CTJD19HW"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Initialize Firestore
+        const db = firebase.firestore();
+
+        // Reference a single document (e.g., "publicNote")
+        const noteDocRef = db.collection("notes").doc("publicNote");
+
+        // Listen for live changes to the document
+        noteDocRef.onSnapshot(function(doc) {
+          if (doc.exists) {
+            const data = doc.data();
+            const textArea = document.getElementById("notepad");
+            if (data && data.content !== textArea.value) {
+              textArea.value = data.content;
+            }
+          }
+        });
+
+        // Update Firestore whenever the text area changes
+        const textArea = document.getElementById("notepad");
+        textArea.addEventListener("input", function() {
+          noteDocRef.set({
+            content: textArea.value
+          });
+        });
+      </script>
+    </div>
   </body>
 </html>
